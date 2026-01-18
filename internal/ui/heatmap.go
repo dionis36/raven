@@ -28,10 +28,9 @@ func RenderHeatmap(counts map[string]int) string {
 	// Simple MVP: Just distinct blocks for the last N days wrapping?
 	// Let's stick to true GitHub style:
 	// Calculate weeks
-	weeks := len(dates) / 7
-	if len(dates)%7 != 0 {
-		weeks++
-	}
+	// Calculate weeks safely
+	// We might need extra columns if the sequence doesn't start/end on week boundaries perfectly
+	weeks := (len(dates) / 7) + 2
 
 	grid := make([][]string, 7) // 7 rows
 	for i := range grid {
@@ -57,7 +56,9 @@ func RenderHeatmap(counts map[string]int) string {
 			s = highStyle
 		}
 
-		grid[weekday][currWeek] = s.String()
+		if currWeek < len(grid[weekday]) {
+			grid[weekday][currWeek] = s.String()
+		}
 
 		if weekday == 6 {
 			currWeek++
