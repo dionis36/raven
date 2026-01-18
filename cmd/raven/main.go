@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"raven/internal/cli"
 )
 
 func main() {
-	fmt.Println("Raven - Smart Git Commit Assistant")
+	cli.Execute()
 }
