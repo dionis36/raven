@@ -106,18 +106,22 @@ func (m CalendarModel) View() string {
 	// width 8 chars, height 4 lines
 
 	// Header: Month Year
+	// Grid width approx: 7 columns * (4 width + 2 border) = 42 chars
 	header := lipgloss.NewStyle().
 		Bold(true).
 		Foreground(lipgloss.Color("205")).
 		Align(lipgloss.Center).
-		Width(60). // Approx 7 * 8 + padding
+		Width(42).
 		Render(m.ViewingMonth.Format("January 2006")) + "\n"
 
 	// Weekday Headers
 	weekdays := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 	wHeader := ""
 	for _, day := range weekdays {
-		wHeader += lipgloss.NewStyle().Width(8).Align(lipgloss.Center).Bold(true).Render(day)
+		// Each box is ~6 chars wide with border?
+		// Actually lipgloss border adds to width.
+		// If inner width 4, border 1+1, total 6.
+		wHeader += lipgloss.NewStyle().Width(6).Align(lipgloss.Center).Bold(true).Render(day)
 	}
 	wHeader += "\n"
 
@@ -131,7 +135,7 @@ func (m CalendarModel) View() string {
 
 	// Rows (Allow 6 rows maximum for safety)
 	for row := 0; row < 6; row++ {
-		rowStr := ""
+		var rowBlocks []string
 		for col := 0; col < 7; col++ {
 			// Determine what to render in this cell
 			isDay := false
@@ -156,12 +160,14 @@ func (m CalendarModel) View() string {
 					boxDate.Month() == m.SelectedDate.Month() &&
 					boxDate.Day() == m.SelectedDate.Day()
 
-				rowStr += renderDayBox(dayNum, count, isSelected)
+				rowBlocks = append(rowBlocks, renderDayBox(dayNum, count, isSelected))
 			} else {
-				rowStr += renderEmptyBox()
+				rowBlocks = append(rowBlocks, renderEmptyBox())
 			}
 		}
-		gridStr += rowStr + "\n"
+		// Join the blocks horizontally to form a single row string
+		gridStr += lipgloss.JoinHorizontal(lipgloss.Top, rowBlocks...) + "\n"
+
 		if currentDayIdx > daysInMonth {
 			break
 		}
@@ -192,26 +198,31 @@ func (m CalendarModel) View() string {
 }
 
 func renderDayBox(day int, count int, selected bool) string {
-	// Style for the box
+	// Compact Box Style
+	// Width 4: Fits "30 " or " 1 " comfortably
+	// Height 2: Line 1 for Day, Line 2 for Dot
 	base := lipgloss.NewStyle().
-		Width(8).
-		Height(3).
+		Width(4).
+		Height(2).
 		Border(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240"))
+		BorderForeground(lipgloss.Color("238")) // Darker grey for subtlety
 
 	if selected {
-		base = base.BorderForeground(lipgloss.Color("212")).Bold(true) // Pink highlight
+		base = base.
+			BorderForeground(lipgloss.Color("212")). // Pink border for selection
+			Bold(true)
 	}
 
 	// Content
-	// Top Left: Day
-	// Center: Visual for counts
 	dayStr := fmt.Sprintf("%d", day)
 
 	// Activity indicator
-	indicator := ""
+	indicator := " "
 	if count > 0 {
-		dotColor := "46"
+		dotColor := "250" // Light grey default
+		if count > 0 {
+			dotColor = "46"
+		} // Green
 		if count > 3 {
 			dotColor = "34"
 		}
@@ -223,17 +234,20 @@ func renderDayBox(day int, count int, selected bool) string {
 	}
 
 	// Layout:
-	// "12    "
-	// "  ●   "
-	content := fmt.Sprintf("%-2s\n  %s", dayStr, indicator)
+	// "12"  (Align Right for cleaner calendar look?)
+	// " ●"
+	// Let's try centering both
 
-	return base.Render(content)
+	l1 := lipgloss.NewStyle().Width(4).Align(lipgloss.Center).Render(dayStr)
+	l2 := lipgloss.NewStyle().Width(4).Align(lipgloss.Center).Render(indicator)
+
+	return base.Render(l1 + "\n" + l2)
 }
 
 func renderEmptyBox() string {
 	return lipgloss.NewStyle().
-		Width(8).
-		Height(3).
+		Width(4).
+		Height(2).
 		Border(lipgloss.HiddenBorder()).
 		Render(" ")
 }
