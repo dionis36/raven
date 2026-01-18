@@ -27,8 +27,8 @@ var statsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		// Interactive Heatmap
-		p := tea.NewProgram(ui.InitialStatsModel(counts))
+		// Interactive Calendar Heatmap
+		p := tea.NewProgram(ui.InitialCalendarModel(counts))
 		if _, err := p.Run(); err != nil {
 			fmt.Printf("Alas, there's been an error: %v", err)
 			os.Exit(1)
