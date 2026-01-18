@@ -64,9 +64,11 @@ func RenderHeatmap(counts map[string]int) string {
 		}
 	}
 
-	// Build string
 	output := ""
-	output += lipgloss.NewStyle().Bold(true).Render("Contribution Graph (Last 6 Months)") + "\n\n"
+	output += lipgloss.NewStyle().
+		Foreground(lipgloss.Color("212")).
+		Bold(true).
+		Render("📊 Contribution Activity") + "\n\n"
 
 	for row := 0; row < 7; row++ {
 		for col := 0; col < weeks; col++ {
@@ -87,5 +89,9 @@ func RenderHeatmap(counts map[string]int) string {
 		midStyle.String() + " 3-5  " +
 		highStyle.String() + " 6+"
 
-	return output
+	return lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(lipgloss.Color("62")).
+		Padding(1, 2).
+		Render(output)
 }

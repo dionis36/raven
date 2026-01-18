@@ -7,6 +7,7 @@ import (
 	"raven/internal/analysis"
 	"raven/internal/git"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 )
 
@@ -41,7 +42,23 @@ var suggestCmd = &cobra.Command{
 			msg = fmt.Sprintf("%s: %s", suggestion.Type, suggestion.Description)
 		}
 
-		fmt.Println(msg)
+		// Rich UI Output
+		headerStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("205")).
+			Bold(true).
+			Padding(0, 1).
+			Render("✨ Raven Suggestion")
+
+		msgStyle := lipgloss.NewStyle().
+			Foreground(lipgloss.Color("#FAFAFA")).
+			Background(lipgloss.Color("#7D56F4")).
+			Padding(1, 4).
+			Border(lipgloss.RoundedBorder()).
+			BorderForeground(lipgloss.Color("205")).
+			MarginTop(1)
+
+		fmt.Println(headerStyle)
+		fmt.Println(msgStyle.Render(msg))
 	},
 }
 

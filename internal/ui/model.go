@@ -100,23 +100,29 @@ func (m Model) View() string {
 		MarginBottom(1).
 		Render(m.Message)
 
+	// Button Styles
+	btnStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#FFF7DB")).
+		Background(lipgloss.Color("#888B7E")).
+		Padding(0, 3).
+		MarginRight(1)
+
+	activeBtnStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("#FFF7DB")).
+		Background(lipgloss.Color("#F25D94")). // Pinkish focus
+		Padding(0, 3).
+		MarginRight(1).
+		Bold(true)
+
 	// Render choices
-	s := ""
+	s := "\n"
 	for i, choice := range m.choices {
-		cursor := " " // no cursor
 		if m.cursor == i {
-			cursor = ">" // cursor!
+			s += activeBtnStyle.Render(choice)
+		} else {
+			s += btnStyle.Render(choice)
 		}
-
-		style := lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
-		if m.cursor == i {
-			style = lipgloss.NewStyle().
-				Foreground(lipgloss.Color("86")).
-				Bold(true)
-		}
-
-		s += fmt.Sprintf("%s %s  ", cursor, style.Render(choice))
 	}
 
-	return fmt.Sprintf("\n%s\n%s\n\n%s\n\n(arrows/tab to move, enter to select)\n", header, msgBox, s)
+	return fmt.Sprintf("\n%s\n%s\n%s\n\n%s", header, msgBox, s, lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render("(Use arrows to navigate, Enter to select)"))
 }

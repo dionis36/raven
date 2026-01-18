@@ -25,3 +25,9 @@ release:
 	GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux cmd/raven/main.go
 	GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME)-windows.exe cmd/raven/main.go
 	GOOS=darwin GOARCH=amd64 go build -o $(BINARY_NAME)-macos cmd/raven/main.go
+
+install: build
+	sudo mv $(BINARY_NAME) /usr/local/bin/
+
+uninstall:
+	sudo rm -f /usr/local/bin/$(BINARY_NAME)
