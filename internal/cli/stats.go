@@ -8,6 +8,7 @@ import (
 	"raven/internal/stats"
 	"raven/internal/ui"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
 
@@ -26,8 +27,12 @@ var statsCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		heatmap := ui.RenderHeatmap(counts)
-		fmt.Println(heatmap)
+		// Interactive Heatmap
+		p := tea.NewProgram(ui.InitialStatsModel(counts))
+		if _, err := p.Run(); err != nil {
+			fmt.Printf("Alas, there's been an error: %v", err)
+			os.Exit(1)
+		}
 	},
 }
 
