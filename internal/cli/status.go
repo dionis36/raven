@@ -25,11 +25,6 @@ var statusCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		if len(result.Files) == 0 {
-			fmt.Println("No changes found (working tree clean).")
-			return
-		}
-
 		// Render Static Status (No interaction necessary)
 		// This mimics `git status` which prints and exits.
 		model := ui.InitialStatusModel(result, ui.StatusModeView)

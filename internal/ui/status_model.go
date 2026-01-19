@@ -27,9 +27,37 @@ type StatusModel struct {
 }
 
 func InitialStatusModel(data git.StatusResult, mode StatusMode) StatusModel {
+	files := data.Files
+
+	// If in Add Mode, we only want to show files that have UNSTAGED changes.
+	// This prevents "staging already staged files".
+	// We keep files that are:
+	// - Untracked ("??")
+	// - Modified Unstaged (" M")
+	// - Partially Staged ("MM")
+	// We exclude:
+	// - Fully Staged ("M ", "A ")
+	if mode == StatusModeAdd {
+		var actionableFiles []git.FileStatus
+		for _, f := range files {
+			// Logic: If it has "Status" string.
+			// Untracked is "??"
+			// Modified Unstaged is " M" or "MM"
+			// Fully Staged is "M " or "A " -> We skip these for "Add" list
+
+			// Simple check: If the second char is not ' ', it has unstaged changes.
+			// Or if it is untracked.
+			hasUnstagedChanges := len(f.Status) >= 2 && f.Status[1] != ' '
+			if f.Untracked || hasUnstagedChanges {
+				actionableFiles = append(actionableFiles, f)
+			}
+		}
+		files = actionableFiles
+	}
+
 	return StatusModel{
 		BranchInfo: data.BranchInfo,
-		Files:      data.Files,
+		Files:      files,
 		Selected:   make(map[int]bool),
 		Mode:       mode,
 	}
@@ -60,6 +88,23 @@ func (m StatusModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case " ": // Space to toggle select
 			if m.Mode == StatusModeAdd {
 				m.Selected[m.Cursor] = !m.Selected[m.Cursor]
+			}
+
+		case "a": // Select All / Deselect All
+			if m.Mode == StatusModeAdd {
+				// Check if all are currently selected
+				allSelected := true
+				for i := range m.Files {
+					if !m.Selected[i] {
+						allSelected = false
+						break
+					}
+				}
+
+				// Toggle
+				for i := range m.Files {
+					m.Selected[i] = !allSelected
+				}
 			}
 
 		case "enter":
@@ -181,7 +226,7 @@ func (m StatusModel) View() string {
 		if m.Mode == StatusModeView {
 			helpMsg = "(Use 'raven add' to stage changes • q to quit)"
 		} else {
-			helpMsg = "(Space to toggle • Enter to stage • q to quit)"
+			helpMsg = "(Space toggle • 'a' all • Enter stage • q quit)"
 		}
 		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1).Render(helpMsg))
 	} else {
