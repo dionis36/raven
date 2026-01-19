@@ -71,8 +71,10 @@ var commitCmd = &cobra.Command{
 
 		// Handle Result
 		finalModel := m.(ui.Model)
+		fmt.Printf("DEBUG: Choice: %v (IsEditing: %v)\n", finalModel.Choice, finalModel.IsEditing)
 		switch finalModel.Choice {
 		case ui.ChoiceApply:
+			fmt.Println("DEBUG: Applying commit...")
 			// git commit -m "msg"
 			c := exec.Command("git", "commit", "-m", finalModel.Message)
 			c.Stdout = os.Stdout
