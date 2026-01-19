@@ -7,7 +7,6 @@ import (
 	"raven/internal/git"
 	"raven/internal/ui"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/spf13/cobra"
 )
 
@@ -31,12 +30,11 @@ var statusCmd = &cobra.Command{
 			return
 		}
 
-		// Start Status UI in View Mode
-		p := tea.NewProgram(ui.InitialStatusModel(result, ui.StatusModeView))
-		if _, err := p.Run(); err != nil {
-			fmt.Println("Error running UI:", err)
-			os.Exit(1)
-		}
+		// Render Static Status (No interaction necessary)
+		// This mimics `git status` which prints and exits.
+		model := ui.InitialStatusModel(result, ui.StatusModeView)
+		model.Static = true
+		fmt.Println(model.View())
 	},
 }
 

@@ -21,6 +21,7 @@ type StatusModel struct {
 	Cursor     int
 	Selected   map[int]bool // Indices selected for staging
 	Mode       StatusMode
+	Static     bool // If true, render for static output (no help msg)
 	Quitting   bool
 	Done       bool // User hit Enter
 }
@@ -73,10 +74,10 @@ func (m StatusModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m StatusModel) View() string {
-	if m.Quitting {
+	if m.Quitting && !m.Static {
 		return ""
 	}
-	if m.Done {
+	if m.Done && !m.Static {
 		return ""
 	}
 
@@ -115,7 +116,7 @@ func (m StatusModel) View() string {
 		for _, i := range indices {
 			file := m.Files[i]
 			cursor := "  "
-			if m.Cursor == i {
+			if m.Cursor == i && !m.Static {
 				cursor = "> "
 			}
 
@@ -151,7 +152,7 @@ func (m StatusModel) View() string {
 			}
 
 			// Cursor Highlight
-			if m.Cursor == i {
+			if m.Cursor == i && !m.Static {
 				style = style.Bold(true).Underline(true)
 			}
 
@@ -175,13 +176,18 @@ func (m StatusModel) View() string {
 	}
 
 	// Footer Help
-	helpMsg := ""
-	if m.Mode == StatusModeView {
-		helpMsg = "(Use 'raven add' to stage changes • q to quit)"
+	if !m.Static {
+		helpMsg := ""
+		if m.Mode == StatusModeView {
+			helpMsg = "(Use 'raven add' to stage changes • q to quit)"
+		} else {
+			helpMsg = "(Space to toggle • Enter to stage • q to quit)"
+		}
+		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1).Render(helpMsg))
 	} else {
-		helpMsg = "(Space to toggle • Enter to stage • q to quit)"
+		// Static Footer Hint
+		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1).Render("(Use 'raven add' to stage changes)"))
 	}
-	s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color("240")).MarginTop(1).Render(helpMsg))
 
 	return s.String()
 }
