@@ -22,17 +22,36 @@ var commitCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
+		// 1. Check for staged changes
 		diff, err := git.GetStagedDiff()
 		if err != nil {
 			fmt.Printf("Error getting staged changes: %v\n", err)
 			os.Exit(1)
 		}
 
+		// 2. AUTO-STAGE LOGIC
 		if diff == "" {
-			fmt.Println("No staged changes found.")
-			return
+			fmt.Println("ℹ️  No staged changes found.")
+			fmt.Println("Launching interactive staging... (Select files with Space, Enter to Confirm)")
+
+			// Call the ADD flow
+			RunInteractiveAdd()
+
+			// Re-check diff after staging
+			diff, err = git.GetStagedDiff()
+			if err != nil {
+				fmt.Printf("Error getting staged changes: %v\n", err)
+				os.Exit(1)
+			}
+
+			// If still empty, user cancelled staging
+			if diff == "" {
+				fmt.Println("❌ Nothing staged. Commit aborted.")
+				return
+			}
 		}
 
+		// 3. Proceed with Analysis & Commit
 		// Analysis
 		suggestion := analysis.AnalyzeDiff(diff)
 		msg := ""
@@ -55,7 +74,6 @@ var commitCmd = &cobra.Command{
 		switch finalModel.Choice {
 		case ui.ChoiceApply:
 			// git commit -m "msg"
-			// In theory we should handle quotes safely, but for MVP exec.Command handles args safely
 			c := exec.Command("git", "commit", "-m", finalModel.Message)
 			c.Stdout = os.Stdout
 			c.Stderr = os.Stderr
@@ -66,10 +84,7 @@ var commitCmd = &cobra.Command{
 			}
 
 		case ui.ChoiceEdit:
-			// Open EDITOR with the message
-			// Flow: write msg to temp file, open editor, read back, commit
-			// Simple MVP: just open editor for git commit command?
-			// Better: git commit -m "msg" --edit
+			// git commit -m "msg" --edit
 			c := exec.Command("git", "commit", "-m", finalModel.Message, "--edit")
 			c.Stdin = os.Stdin
 			c.Stdout = os.Stdout

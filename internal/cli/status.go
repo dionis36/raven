@@ -1,0 +1,45 @@
+package cli
+
+import (
+	"fmt"
+	"os"
+
+	"raven/internal/git"
+	"raven/internal/ui"
+
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/spf13/cobra"
+)
+
+var statusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Show the working tree status",
+	Run: func(cmd *cobra.Command, args []string) {
+		if !git.IsRepository() {
+			fmt.Println("Error: This is not a git repository.")
+			os.Exit(1)
+		}
+
+		result, err := git.GetStatus()
+		if err != nil {
+			fmt.Println("Error getting status:", err)
+			os.Exit(1)
+		}
+
+		if len(result.Files) == 0 {
+			fmt.Println("No changes found (working tree clean).")
+			return
+		}
+
+		// Start Status UI in View Mode
+		p := tea.NewProgram(ui.InitialStatusModel(result, ui.StatusModeView))
+		if _, err := p.Run(); err != nil {
+			fmt.Println("Error running UI:", err)
+			os.Exit(1)
+		}
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(statusCmd)
+}
