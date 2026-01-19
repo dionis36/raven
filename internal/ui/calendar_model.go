@@ -107,21 +107,21 @@ func (m CalendarModel) View() string {
 
 	// Header: Month Year
 	// Grid width approx: 7 columns * (4 width + 2 border) = 42 chars
+	// Header: Month Year
+	// Grid width approx: 7 columns * (4 wid + 2 bound + 1 margin) = 7 * 7 = 49 chars
 	header := lipgloss.NewStyle().
 		Bold(true).
-		Foreground(lipgloss.Color("205")).
+		Foreground(lipgloss.Color("#38BDF8")). // Sky-400
 		Align(lipgloss.Center).
-		Width(42).
+		Width(50).
 		Render(m.ViewingMonth.Format("January 2006")) + "\n"
 
 	// Weekday Headers
 	weekdays := []string{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}
 	wHeader := ""
 	for _, day := range weekdays {
-		// Each box is ~6 chars wide with border?
-		// Actually lipgloss border adds to width.
-		// If inner width 4, border 1+1, total 6.
-		wHeader += lipgloss.NewStyle().Width(6).Align(lipgloss.Center).Bold(true).Render(day)
+		// Each box consumes ~7 chars width (including margin)
+		wHeader += lipgloss.NewStyle().Width(7).Align(lipgloss.Center).Bold(true).Render(day)
 	}
 	wHeader += "\n"
 
@@ -186,7 +186,7 @@ func (m CalendarModel) View() string {
 	} else {
 		c := m.Counts[m.SelectedDate.Format("2006-01-02")]
 		selInfo = lipgloss.NewStyle().
-			Foreground(lipgloss.Color("212")).
+			Foreground(lipgloss.Color("#38BDF8")). // Sky-400
 			Render(fmt.Sprintf("%s: %d commits", m.SelectedDate.Format("Mon Jan 02"), c))
 	}
 
@@ -198,57 +198,60 @@ func (m CalendarModel) View() string {
 }
 
 func renderDayBox(day int, count int, selected bool) string {
-	// Compact Box Style
-	// Width 4: Fits "30 " or " 1 " comfortably
-	// Height 2: Line 1 for Day, Line 2 for Dot
-	base := lipgloss.NewStyle().
-		Width(4).
-		Height(2).
-		Border(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("238")) // Darker grey for subtlety
+	// 1. Determine Colors
+	// Default: Empty Container
+	bgColor := lipgloss.Color("#262626") // Neutral Dark Grey (Distinct from Blue)
+	fgColor := lipgloss.Color("250")     // Grey Text
 
-	if selected {
-		base = base.
-			BorderForeground(lipgloss.Color("212")). // Pink border for selection
-			Bold(true)
-	}
-
-	// Content
-	dayStr := fmt.Sprintf("%d", day)
-
-	// Activity indicator
-	indicator := " "
 	if count > 0 {
-		dotColor := "250" // Light grey default
-		if count > 0 {
-			dotColor = "46"
-		} // Green
-		if count > 3 {
-			dotColor = "34"
+		fgColor = lipgloss.Color("255") // White Text (Active)
+		if count <= 2 {
+			bgColor = lipgloss.Color("#1E3A5F") // Dark Blue
+		} else if count <= 5 {
+			bgColor = lipgloss.Color("#0369A1") // Sky-700
+		} else if count <= 10 {
+			bgColor = lipgloss.Color("#0EA5E9") // Sky-500
+		} else if count <= 15 {
+			bgColor = lipgloss.Color("#38BDF8") // Sky-400
+		} else {
+			bgColor = lipgloss.Color("#F59E0B") // Gold (Exceptional)
+			fgColor = lipgloss.Color("232")     // Black text on Gold
 		}
-		if count > 6 {
-			dotColor = "22"
-		}
-
-		indicator = lipgloss.NewStyle().Foreground(lipgloss.Color(dotColor)).Render("●")
 	}
 
-	// Layout:
-	// "12"  (Align Right for cleaner calendar look?)
-	// " ●"
-	// Let's try centering both
+	// 2. Base Style: UNIFORM 6x3 SOLID BLOCKS
+	// No borders. This guarantees identical dimensions for all squares.
+	style := lipgloss.NewStyle().
+		Width(6).
+		Height(3).
+		Align(lipgloss.Center, lipgloss.Center).
+		Background(bgColor).
+		Foreground(fgColor).
+		MarginRight(1).
+		MarginBottom(1)
 
-	l1 := lipgloss.NewStyle().Width(4).Align(lipgloss.Center).Render(dayStr)
-	l2 := lipgloss.NewStyle().Width(4).Align(lipgloss.Center).Render(indicator)
+	// 3. Selection Indicator
+	if selected {
+		// Instead of changing size/border, we emphasize the content.
+		// 1. Sky Blue Text
+		// 2. Bold
+		// 3. Underline (to simulate a "cursor" without changing box size)
+		style = style.
+			Foreground(lipgloss.Color("#38BDF8")). // Sky-400 Text (Matches Theme)
+			Bold(true).
+			Underline(true)
+	}
 
-	return base.Render(l1 + "\n" + l2)
+	return style.Render(fmt.Sprintf("%02d", day))
 }
 
 func renderEmptyBox() string {
+	// Padding (Pre-month days)
 	return lipgloss.NewStyle().
-		Width(4).
-		Height(2).
-		Border(lipgloss.HiddenBorder()).
+		Width(6).
+		Height(3).
+		MarginRight(1).
+		MarginBottom(1).
 		Render(" ")
 }
 
