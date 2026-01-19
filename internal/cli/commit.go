@@ -83,18 +83,6 @@ var commitCmd = &cobra.Command{
 				fmt.Println("Commit successful! 🚀")
 			}
 
-		case ui.ChoiceEdit:
-			// git commit -m "msg" --edit
-			c := exec.Command("git", "commit", "-m", finalModel.Message, "--edit")
-			c.Stdin = os.Stdin
-			c.Stdout = os.Stdout
-			c.Stderr = os.Stderr
-			if err := c.Run(); err != nil {
-				fmt.Println("Error committing:", err)
-			} else {
-				fmt.Println("Commit successful! 🚀")
-			}
-
 		case ui.ChoiceCancel:
 			fmt.Println("Commit canceled.")
 		case ui.ChoiceNone:

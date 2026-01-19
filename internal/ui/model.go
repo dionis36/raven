@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -24,25 +25,62 @@ type Model struct {
 	Quitting bool
 	cursor   int
 	choices  []string
+
+	// Inline Editing State
+	IsEditing bool
+	Input     textinput.Model
 }
 
 // InitialModel returns the initial model state with the suggested message.
 func InitialModel(msg string) Model {
+	ti := textinput.New()
+	ti.Placeholder = "Commit message..."
+	ti.SetValue(msg)
+	ti.Width = 60
+	ti.CharLimit = 100
+
 	return Model{
 		Message: msg,
 		Choice:  ChoiceNone,
 		choices: []string{"Apply", "Edit", "Cancel"},
 		cursor:  0,
+		Input:   ti,
 	}
 }
 
 // Init initializes the IO.
 func (m Model) Init() tea.Cmd {
-	return nil
+	return textinput.Blink
 }
 
 // Update handles messages.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	// IF EDITING: Handle Text Input
+	if m.IsEditing {
+		var cmd tea.Cmd
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch msg.Type {
+			case tea.KeyEnter:
+				// Save changes and exit edit mode
+				m.Message = m.Input.Value()
+				m.IsEditing = false
+				m.Choice = ChoiceNone // Reset choice so they can click Apply
+				m.cursor = 0          // Focus Apply
+				return m, nil
+			case tea.KeyEsc:
+				// Cancel edit, revert to original message (?)
+				// Or just keep current value but correct it.
+				// Let's just exit edit mode with current value to be safe.
+				m.IsEditing = false
+				return m, nil
+			}
+		}
+		m.Input, cmd = m.Input.Update(msg)
+		return m, cmd
+	}
+
+	// NORMAL NAVIGATION MODE
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -70,13 +108,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch m.cursor {
 			case 0:
 				m.Choice = ChoiceApply
+				m.Quitting = true
+				return m, tea.Quit
 			case 1:
+				// ENTER EDIT MODE
 				m.Choice = ChoiceEdit
+				m.IsEditing = true
+				m.Input.SetValue(m.Message) // Reset input to current message
+				m.Input.Focus()
+				return m, textinput.Blink
 			case 2:
 				m.Choice = ChoiceCancel
+				m.Quitting = true
+				return m, tea.Quit
 			}
-			m.Quitting = true
-			return m, tea.Quit
 		}
 	}
 	return m, nil
@@ -93,12 +138,21 @@ func (m Model) View() string {
 		Foreground(lipgloss.Color("212")).
 		Render("Raven 🐦 Suggestion:")
 
+	// MSG BOX or INPUT BOX
+	var msgContent string
+	if m.IsEditing {
+		msgContent = m.Input.View()
+	} else {
+		msgContent = m.Message
+	}
+
 	msgBox := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(lipgloss.Color("63")).
 		Padding(1, 2).
 		MarginBottom(1).
-		Render(m.Message)
+		Width(60).
+		Render(msgContent)
 
 	// Button Styles
 	btnStyle := lipgloss.NewStyle().
@@ -115,14 +169,20 @@ func (m Model) View() string {
 		Bold(true)
 
 	// Render choices
+	// Don't render buttons if editing
 	s := "\n"
-	for i, choice := range m.choices {
-		if m.cursor == i {
-			s += activeBtnStyle.Render(choice)
-		} else {
-			s += btnStyle.Render(choice)
+	if m.IsEditing {
+		s += lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render("(Enter to save, Esc to cancel editing)")
+	} else {
+		for i, choice := range m.choices {
+			if m.cursor == i {
+				s += activeBtnStyle.Render(choice)
+			} else {
+				s += btnStyle.Render(choice)
+			}
 		}
+		s += "\n\n" + lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render("(Use arrows to navigate, Enter to select)")
 	}
 
-	return fmt.Sprintf("\n%s\n%s\n%s\n\n%s", header, msgBox, s, lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render("(Use arrows to navigate, Enter to select)"))
+	return fmt.Sprintf("\n%s\n%s\n%s", header, msgBox, s)
 }
