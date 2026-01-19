@@ -13,8 +13,9 @@ import (
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add [.]",
-	Short: "Interactively stage files for commit",
+	Use:     "add [.]",
+	Aliases: []string{"a"},
+	Short:   "Interactively stage files for commit",
 	Run: func(cmd *cobra.Command, args []string) {
 		// Check for "add ." shortcut
 		if len(args) > 0 && args[0] == "." {

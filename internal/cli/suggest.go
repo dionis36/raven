@@ -27,7 +27,15 @@ var suggestCmd = &cobra.Command{
 		}
 
 		if diff == "" {
-			fmt.Println("No staged changes found.")
+			// Check if we have unstaged files
+			status, err := git.GetStatus()
+			if err == nil && len(status.Files) > 0 {
+				fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Render("ℹ️  No staged changes found."))
+				fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render("💡 Tip: Use 'raven commit' to automatically stage, analyze, and commit."))
+				fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("240")).Render("   Or run 'raven add' to stage files manually."))
+			} else {
+				fmt.Println(lipgloss.NewStyle().Foreground(lipgloss.Color("#38BDF8")).Bold(true).Render("✨ Working tree clean. Nothing to commit."))
+			}
 			return
 		}
 

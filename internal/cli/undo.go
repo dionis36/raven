@@ -11,9 +11,10 @@ import (
 )
 
 var undoCmd = &cobra.Command{
-	Use:   "undo",
-	Short: "Undo the last commit (keeps changes staged)",
-	Long:  "Executes 'git reset --soft HEAD~1', effectively un-committing the last commit while keeping the changes staged.",
+	Use:     "undo",
+	Aliases: []string{"u"},
+	Short:   "Undo the last commit (keeps changes staged)",
+	Long:    "Executes 'git reset --soft HEAD~1', effectively un-committing the last commit while keeping the changes staged.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !git.IsRepository() {
 			fmt.Println("Error: This is not a git repository.")

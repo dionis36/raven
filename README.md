@@ -28,7 +28,8 @@ sudo mv raven /usr/local/bin/
 ## Usage
 
 ### 1. View & Manage Status
-Check the status of your repository and stage files interactively:
+Check repository status.
+*   **Alias**: `raven s`
 
 ```bash
 raven status
@@ -36,17 +37,53 @@ raven status
 # On branch main ⬆️ 11
 # Changes to be committed / Modified:
 #   M internal/cli/commit.go
-# Untracked files:
-#   ? new_feature.go
 ```
 
-Stage files easily:
+Stage files interactively or instantly.
+*   **Alias**: `raven a`
 
 ```bash
 raven add [.]
-# Launch interactive staging list (Space to toggle, 'a' for all)
-# Or use '.' to stage all changes instantly
+# 'raven a' invokes interactive list.
+# 'raven add .' stages all changes instantly.
 ```
+
+### 2. Smart Commit
+Launch the interactive TUI to auto-analyze changes and suggest a message.
+*   **Alias**: `raven c`
+
+```bash
+raven commit
+```
+*   **Auto-Staging**: If nothing is staged, it prompts you to select files.
+*   **Inline Editing**: Select [Edit] to modify the message without leaving the CLI.
+
+**Manual Mode**:
+Bypass analysis and commit instantly.
+```bash
+raven commit -m "feat: manual message"
+```
+
+### 3. "Super Shorthands" (Efficiency Tools)
+Raven includes powerful commands to speed up your workflow.
+
+#### The "Save Point"
+Stage **all** files (tracked & untracked) and commit in one go.
+*   **Alias**: `raven ac`, `raven snap`
+
+```bash
+raven save
+# Stages all files -> Analyzes -> Opens Interactive TUI
+
+raven save -m "wip: fast save"
+# Stages all files -> Commits instantly (No TUI)
+```
+
+#### Undo & Amend
+*   **`raven undo`** (`alias: u`): Instantly "un-commits" the last commit but **keeps your changes staged**. Safe and fast.
+#### Quick Fixup
+*   **`raven fix`** (`alias: f`): Stages all changes and merges them into the last commit **silently** (keeps the old message). Great for fixing typos.
+    *   *Includes a safety confirmation prompt.*
 
 ### 2. Smart Commit
 Launch the interactive TUI to auto-analyze changes and suggest a message:
@@ -71,12 +108,15 @@ Check your coding activity:
 raven stats
 ```
 
-## Contributing
-Pull requests are welcome! Please ensure you run tests before submitting.
+### 4. Smart Suggestions
+Get a quick AI suggestion printed to stdout.
+*   **Alias**: `raven sg` (System Command)
 
 ```bash
-go test ./...
+raven suggest
+# Output: feat(cli): add simple suggest command
 ```
+*   **Smart Feedback**: If nothing is staged, it will check for unstaged files and give you tips.
 
 ## License
 MIT

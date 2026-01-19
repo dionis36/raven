@@ -12,9 +12,10 @@ import (
 )
 
 var amendCmd = &cobra.Command{
-	Use:   "amend",
-	Short: "Amend the last commit message and/or staged files",
-	Long:  "Opens the last commit message for editing. If you have staged new files, they will be combined into the last commit.",
+	Use:     "amend",
+	Aliases: []string{"m"},
+	Short:   "Amend the last commit message and/or staged files",
+	Long:    "Opens the last commit message for editing. If you have staged new files, they will be combined into the last commit.",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !git.IsRepository() {
 			fmt.Println("Error: This is not a git repository.")

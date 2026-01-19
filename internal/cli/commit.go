@@ -14,8 +14,9 @@ import (
 )
 
 var commitCmd = &cobra.Command{
-	Use:   "commit",
-	Short: "Interactively generate and apply a commit message",
+	Use:     "commit",
+	Aliases: []string{"c", "ci"},
+	Short:   "Interactively generate and apply a commit message",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !git.IsRepository() {
 			fmt.Println("Error: This is not a git repository.")

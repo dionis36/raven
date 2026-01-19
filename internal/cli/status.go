@@ -11,8 +11,9 @@ import (
 )
 
 var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Show the working tree status",
+	Use:     "status",
+	Aliases: []string{"s"},
+	Short:   "Show the working tree status",
 	Run: func(cmd *cobra.Command, args []string) {
 		if !git.IsRepository() {
 			fmt.Println("Error: This is not a git repository.")
