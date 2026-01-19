@@ -43,7 +43,7 @@ var saveCmd = &cobra.Command{
 		}
 
 		// 3. Delegate to Shared Commit Logic
-		performCommit(diff, saveMsgFlag)
+		performCommit(diff, saveMsgFlag, "", false)
 	},
 }
 
