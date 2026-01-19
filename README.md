@@ -27,22 +27,42 @@ sudo mv raven /usr/local/bin/
 
 ## Usage
 
-### 1. Suggest a Commit (Headless)
-Get a quick suggestion printed to stdout:
+### 1. View & Manage Status
+Check the status of your repository and stage files interactively:
 
 ```bash
-raven suggest
-# Output: feat(cli): add simple suggest command
+raven status
+# Output:
+# On branch main ⬆️ 11
+# Changes to be committed / Modified:
+#   M internal/cli/commit.go
+# Untracked files:
+#   ? new_feature.go
 ```
 
-### 2. Interactive Commit (Recommended)
-Launch the interactive TUI to review and confirm:
+Stage files easily:
+
+```bash
+raven add [.]
+# Launch interactive staging list (Space to toggle, 'a' for all)
+# Or use '.' to stage all changes instantly
+```
+
+### 2. Smart Commit
+Launch the interactive TUI to auto-analyze changes and suggest a message:
 
 ```bash
 raven commit
 ```
-*   **Arrow Keys/Tab**: Navigate options.
-*   **Enter**: Select action (Apply, Edit, Cancel).
+*   **Auto-Staging**: If nothing is staged, it prompts you to select files.
+*   **Inline Editing**: Select [Edit] to modify the message without leaving the CLI.
+
+**Manual Mode**:
+Bypass analysis and commit directly (still runs auto-staging check):
+
+```bash
+raven commit -m "feat: manual message"
+```
 
 ### 3. View Stats
 Check your coding activity:
