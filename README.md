@@ -1,4 +1,5 @@
-# Raven 🐦  
+# Raven 🐦
+
 **Smart Git Commit Assistant (CLI Tool)**
 
 Raven is a cross-platform, terminal-based tool written in Go that analyzes your staged changes and suggests **Conventional Commit** messages. It also tracks your coding activity with a built-in contribution heatmap.
@@ -16,6 +17,7 @@ Raven is a cross-platform, terminal-based tool written in Go that analyzes your 
 ## Installation
 
 ### From Source
+
 Requires **Go 1.25+**.
 
 ```bash
@@ -28,8 +30,10 @@ sudo mv raven /usr/local/bin/
 ## Usage
 
 ### 1. View & Manage Status
+
 Check repository status.
-*   **Alias**: `raven s`
+
+- **Alias**: `raven s`
 
 ```bash
 raven status
@@ -40,7 +44,8 @@ raven status
 ```
 
 Stage files interactively or instantly.
-*   **Alias**: `raven a`
+
+- **Alias**: `raven a`
 
 ```bash
 raven add [.]
@@ -49,27 +54,34 @@ raven add [.]
 ```
 
 ### 2. Smart Commit
+
 Launch the interactive TUI to auto-analyze changes and suggest a message.
-*   **Alias**: `raven c`
+
+- **Alias**: `raven c`
 
 ```bash
 raven commit
 ```
-*   **Auto-Staging**: If nothing is staged, it prompts you to select files.
-*   **Inline Editing**: Select [Edit] to modify the message without leaving the CLI.
+
+- **Auto-Staging**: If nothing is staged, it prompts you to select files.
+- **Inline Editing**: Select [Edit] to modify the message without leaving the CLI.
 
 **Manual Mode**:
 Bypass analysis and commit instantly.
+
 ```bash
 raven commit -m "feat: manual message"
 ```
 
 ### 3. "Super Shorthands" (Efficiency Tools)
+
 Raven includes powerful commands to speed up your workflow.
 
 #### The "Save Point"
+
 Stage **all** files (tracked & untracked) and commit in one go.
-*   **Alias**: `raven ac`, `raven snap`
+
+- **Alias**: `raven ac`, `raven snap`
 
 ```bash
 raven save
@@ -80,43 +92,35 @@ raven save -m "wip: fast save"
 ```
 
 #### Undo & Amend
-*   **`raven undo`** (`alias: u`): Instantly "un-commits" the last commit but **keeps your changes staged**. Safe and fast.
+
+- **`raven undo`** (`alias: u`): Instantly "un-commits" the last commit but **keeps your changes staged**. Safe and fast.
+
 #### Quick Fixup
-*   **`raven fix`** (`alias: f`): Stages all changes and merges them into the last commit **silently** (keeps the old message). Great for fixing typos.
-    *   *Includes a safety confirmation prompt.*
 
-### 2. Smart Commit
-Launch the interactive TUI to auto-analyze changes and suggest a message:
+- **`raven fix`** (`alias: f`): Stages all changes and merges them into the last commit **silently** (keeps the old message). Great for fixing typos.
+  - _Includes a safety confirmation prompt._
 
-```bash
-raven commit
-```
-*   **Auto-Staging**: If nothing is staged, it prompts you to select files.
-*   **Inline Editing**: Select [Edit] to modify the message without leaving the CLI.
+### 4. View Stats
 
-**Manual Mode**:
-Bypass analysis and commit directly (still runs auto-staging check):
-
-```bash
-raven commit -m "feat: manual message"
-```
-
-### 3. View Stats
 Check your coding activity:
 
 ```bash
 raven stats
 ```
 
-### 4. Smart Suggestions
+### 5. Smart Suggestions
+
 Get a quick AI suggestion printed to stdout.
-*   **Alias**: `raven sg` (System Command)
+
+- **Alias**: `raven sg` (System Command)
 
 ```bash
 raven suggest
 # Output: feat(cli): add simple suggest command
 ```
-*   **Smart Feedback**: If nothing is staged, it will check for unstaged files and give you tips.
+
+- **Smart Feedback**: If nothing is staged, it will check for unstaged files and give you tips.
 
 ## License
+
 MIT
