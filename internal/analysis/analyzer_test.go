@@ -38,6 +38,26 @@ index 8f23..123 100644
 			diff:     `diff --git a/go.mod b/go.mod`,
 			wantType: "chore",
 		},
+		{
+			name:     "Go Sum change",
+			diff:     `diff --git a/go.sum b/go.sum`,
+			wantType: "chore",
+		},
+		{
+			name:     "Dotfile change",
+			diff:     `diff --git a/.gitignore b/.gitignore`,
+			wantType: "chore",
+		},
+		{
+			name:     "Not diff git header",
+			diff:     `some random text`,
+			wantType: "feat",
+		},
+		{
+			name:     "Invalid diff command",
+			diff:     `diff --git a/something`,
+			wantType: "feat",
+		},
 	}
 
 	for _, tt := range tests {
