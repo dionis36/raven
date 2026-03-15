@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// statsCmd represents the stats command, showing an interactive history heatmap.
 var statsCmd = &cobra.Command{
 	Use:   "stats",
 	Short: "Show a heatmap of git contribution history",
